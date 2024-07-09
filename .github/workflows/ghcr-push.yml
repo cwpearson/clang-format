@@ -1,0 +1,50 @@
+name: Deploy to GHCR
+
+# only run most recent workflow in branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches: [ "master" ]
+
+jobs:
+  build-16:
+    name: Build + Publish 16
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+    - uses: actions/checkout@v4
+      name: Checkout
+
+    - name: Build
+      run: |
+        docker build -f clang-format-16.dockerfile -t ghcr.io/cwpearson/clang-format-16:latest .
+
+    - name: Publish to GHCR
+      run: |
+        echo '${{secrets.GHCR_TOKEN}}' | docker login ghcr.io -u cwpearson --password-stdin
+        docker push ghcr.io/cwpearson/clang-format-16:latest
+  build-8:
+    name: Build + Publish 8
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+    - uses: actions/checkout@v4
+      name: Checkout
+
+    - name: Build
+      run: |
+        docker build -f clang-format-8.dockerfile -t ghcr.io/cwpearson/clang-format-8:latest .
+
+    - name: Publish to GHCR
+      run: |
+        echo '${{secrets.GHCR_TOKEN}}' | docker login ghcr.io -u cwpearson --password-stdin
+        docker push ghcr.io/cwpearson/clang-format-8:latest
