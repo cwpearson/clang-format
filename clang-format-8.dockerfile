@@ -6,12 +6,12 @@ LABEL org.opencontainers.image.title="clang-format 8"
 LABEL description="A container with clang-format 8"
 LABEL org.opencontainers.image.description="A container with clang-format 8"
 LABEL org.opencontainers.image.source https://github.com/cwpearson/clang-format
+LABEL org.opencontainers.image.licenses="MIT"
 # LABEL version="1.0"
 # LABEL org.opencontainers.image.version="1.0"
 # LABEL org.opencontainers.image.url="https://example.com"
 # LABEL org.opencontainers.image.documentation="https://example.com/docs"
 # LABEL org.opencontainers.image.vendor="Example Corp"
-# LABEL org.opencontainers.image.licenses="MIT"
 
 RUN dnf install -y \
     cmake \
