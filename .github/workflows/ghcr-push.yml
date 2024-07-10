@@ -8,6 +8,8 @@ concurrency:
 on:
   push:
     branches: [ "master" ]
+    paths:
+      - '**/*.dockerfile'
 
 jobs:
   build-16:
