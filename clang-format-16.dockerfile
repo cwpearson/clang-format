@@ -1,19 +1,6 @@
 # Stage 1: Build environment
 FROM docker.io/redhat/ubi8 AS builder
 
-LABEL maintainer="Carl Pearson <me@carlpearson.net>"
-LABEL org.opencontainers.image.title="clang-format 16"
-LABEL description="A container with clang-format 16"
-LABEL org.opencontainers.image.description="A container with clang-format 16"
-LABEL org.opencontainers.image.source https://github.com/cwpearson/clang-format
-LABEL org.opencontainers.image.licenses="MIT"
-# LABEL version="1.0"
-# LABEL org.opencontainers.image.version="1.0"
-# LABEL org.opencontainers.image.url="https://example.com"
-# LABEL org.opencontainers.image.documentation="https://example.com/docs"
-# LABEL org.opencontainers.image.vendor="Example Corp"
-
-
 RUN dnf install -y \
     cmake \
     gcc \
@@ -33,6 +20,18 @@ RUN make -C build -j$(nproc) install
 
 # base final image off ubi8-micro
 FROM docker.io/redhat/ubi8-micro
+
+LABEL maintainer="Carl Pearson <me@carlpearson.net>"
+LABEL org.opencontainers.image.title="clang-format 16"
+LABEL description="A container with clang-format 16"
+LABEL org.opencontainers.image.description="A container with clang-format 16"
+LABEL org.opencontainers.image.source https://github.com/cwpearson/clang-format
+LABEL org.opencontainers.image.licenses="MIT"
+# LABEL version="1.0"
+# LABEL org.opencontainers.image.version="1.0"
+# LABEL org.opencontainers.image.url="https://example.com"
+# LABEL org.opencontainers.image.documentation="https://example.com/docs"
+# LABEL org.opencontainers.image.vendor="Example Corp"
 
 # clang-format-16 links this
 COPY --from=builder /lib64/libstdc++.so.6 /lib64/libstdc++.so.6
