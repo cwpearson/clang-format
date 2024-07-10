@@ -37,6 +37,31 @@ jobs:
         echo '${{secrets.GHCR_TOKEN}}' | docker login ghcr.io -u cwpearson --password-stdin
         docker push "$SLUG:latest"
         docker push "$SLUG:$DATE"
+  build-14:
+    name: Build + Publish 14
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+    - uses: actions/checkout@v4
+      name: Checkout
+
+    - name: Set Environment
+      run: |
+        echo "SLUG=ghcr.io/cwpearson/clang-format-14" >> $GITHUB_ENV
+        echo "DATE=$(date +"%Y%m%d")" >> $GITHUB_ENV
+
+    - name: Build
+      run: |
+        docker build -f clang-format-14.dockerfile -t "$SLUG:latest" -t "$SLUG:$DATE" .
+
+    - name: Publish to GHCR
+      run: |
+        echo '${{secrets.GHCR_TOKEN}}' | docker login ghcr.io -u cwpearson --password-stdin
+        docker push "$SLUG:latest"
+        docker push "$SLUG:$DATE"
   build-8:
     name: Build + Publish 8
     runs-on: ubuntu-latest
