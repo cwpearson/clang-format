@@ -4,7 +4,7 @@
 
 ```bash
 cd your/source/tree
-podman run --rm -v "${PWD}"/src ghcr.io/cwpearson/clang-format-16:latest clang-format ...
+podman run --rm -v "${PWD}":/src ghcr.io/cwpearson/clang-format-16:latest clang-format ...
 ```
 
 Inside the container, the working directory is /src, we use the volume mount to map the host working directory `${PWD}` into `/src`: `-v "${PWD}"/src`.
