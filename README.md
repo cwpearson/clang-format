@@ -1,3 +1,5 @@
+Static binary builds of Clang Format for Linux.
+
 Grab a binary from the [latest release](https://github.com/cwpearson/clang-format/releases/latest), or look at the table below:
 
 | OS | Arch | Link |
