@@ -1,0 +1,111 @@
+name: Build clang-format static binaries
+
+on:
+  push:
+    branches: ["*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - clang_version: 14
+            clang_tag: llvmorg-14.0.6
+            arch: amd64
+            runner: ubuntu-22.04
+          - clang_version: 14
+            clang_tag: llvmorg-14.0.6
+            arch: arm64
+            runner: ubuntu-22.04-arm
+          - clang_version: 16
+            clang_tag: llvmorg-16.0.6
+            arch: amd64
+            runner: ubuntu-22.04
+          - clang_version: 16
+            clang_tag: llvmorg-16.0.6
+            arch: arm64
+            runner: ubuntu-22.04-arm
+
+    runs-on: ${{ matrix.runner }}
+    name: clang-format-${{ matrix.clang_version }}-linux-${{ matrix.arch }}
+
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build python3 git
+
+      - name: Clone LLVM ${{ matrix.clang_version }}
+        run: |
+          git clone --depth 1 --branch ${{ matrix.clang_tag }} \
+            https://github.com/llvm/llvm-project.git
+
+      - name: Configure LLVM
+        run: |
+          cmake -G Ninja -S llvm-project/llvm -B build \
+            -DCMAKE_BUILD_TYPE=MinSizeRel \
+            -DLLVM_ENABLE_PROJECTS="clang" \
+            -DLLVM_TARGETS_TO_BUILD="" \
+            -DLLVM_BUILD_STATIC=ON \
+            -DCMAKE_EXE_LINKER_FLAGS="-static" \
+            -DLLVM_ENABLE_ZLIB=OFF \
+            -DLLVM_ENABLE_ZSTD=OFF \
+            -DLLVM_ENABLE_TERMINFO=OFF \
+            -DLLVM_ENABLE_LIBXML2=OFF \
+            -DLLVM_ENABLE_BINDINGS=OFF \
+            -DLLVM_INCLUDE_TESTS=OFF \
+            -DLLVM_INCLUDE_BENCHMARKS=OFF \
+            -DLLVM_INCLUDE_EXAMPLES=OFF \
+            -DLLVM_INCLUDE_DOCS=OFF
+
+      - name: Build clang-format
+        run: ninja -C build clang-format
+
+      - name: Strip binary
+        run: strip build/bin/clang-format
+
+      - name: Prepare artifact
+        run: |
+          ARTIFACT_NAME="clang-format-${{ matrix.clang_version }}-linux-${{ matrix.arch }}"
+          cp build/bin/clang-format "${ARTIFACT_NAME}"
+          chmod +x "${ARTIFACT_NAME}"
+          echo "ARTIFACT_NAME=${ARTIFACT_NAME}" >> "$GITHUB_ENV"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: ${{ env.ARTIFACT_NAME }}
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Compute release tag
+        id: tag
+        run: |
+          BRANCH="${GITHUB_REF_NAME}"
+          SHORT_SHA="${GITHUB_SHA::7}"
+          TAG="${BRANCH}-${SHORT_SHA}"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "name=${TAG}" >> "$GITHUB_OUTPUT"
+
+      - name: Create release and upload assets
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          name: ${{ steps.tag.outputs.name }}
+          files: artifacts/*
+          make_latest: true
