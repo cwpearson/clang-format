@@ -3,6 +3,8 @@ name: Build clang-format static binaries
 on:
   push:
     branches: ["*"]
+    paths:
+      - ".github/workflows/**"
   workflow_dispatch:
 
 permissions:
