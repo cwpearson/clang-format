@@ -1,4 +1,4 @@
-Grab a binary from the [latest release](https://github.com/cwpearson/clang-format/releases/latest).
+Grab a binary from the [latest release](https://github.com/cwpearson/clang-format/releases/latest), or look at the table below:
 
 | OS | Arch | Link |
 |-|-|-|
